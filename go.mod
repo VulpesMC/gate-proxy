@@ -1,8 +1,6 @@
 module github.com/minekube/gate-plugin-template
 
-go 1.24.1
-
-toolchain go1.24.6
+go 1.26
 
 require (
 	github.com/go-logr/logr v1.4.4
@@ -15,6 +13,7 @@ require (
 
 require (
 	buf.build/gen/go/minekube/connect/protocolbuffers/go v1.36.10-20240220124425-904ce30425c9.1 // indirect
+	buf.build/gen/go/vulpescloud/protospecs/connectrpc/go/v2 v2.0.2-20261006204618-79b0f0455462.1 // indirect
 	connectrpc.com/connect v1.19.1 // indirect
 	connectrpc.com/otelconnect v0.9.0 // indirect
 	github.com/Tnze/go-mc v1.20.2 // indirect

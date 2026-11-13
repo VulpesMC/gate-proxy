@@ -10,6 +10,8 @@ buf.build/gen/go/minekube/connect/protocolbuffers/go v1.36.6-20240220124425-904c
 buf.build/gen/go/minekube/connect/protocolbuffers/go v1.36.6-20240220124425-904ce30425c9.1/go.mod h1:4UJIzWc11+qjGTjyHsJk0izbw2FGCJt+gNmpb1TtNuQ=
 buf.build/gen/go/minekube/connect/protocolbuffers/go v1.36.10-20240220124425-904ce30425c9.1 h1:MqT5VV8Omw7x78Xc8rtBAnTnZycOjZFsStpf5oNC7Ag=
 buf.build/gen/go/minekube/connect/protocolbuffers/go v1.36.10-20240220124425-904ce30425c9.1/go.mod h1:xplT/bRgOr5C8V+POP26mv9agbvNmy0M2amPLZZe87s=
+buf.build/gen/go/vulpescloud/protospecs/connectrpc/go/v2 v2.0.2-20261006204618-79b0f0455462.1 h1:UuRlFGfRH9JVrQJTr+3bUcsLR7LyZVjJZ7V8MWj3Sg4=
+buf.build/gen/go/vulpescloud/protospecs/connectrpc/go/v2 v2.0.2-20261006204618-79b0f0455462.1/go.mod h1:vOapk4imI2joEx84oY1Hiwq5QiH0x7c5BlYHg9zxTtc=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.31.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=

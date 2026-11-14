@@ -33,11 +33,33 @@ var Plugin = proxy.Plugin{
 		}
 
 		eventClient := eventspb.NewEventServiceClient(client)
-		_ = EventManager{
+		eventManager := EventManager{
 			eventClient: eventClient,
 			ctx:         ctx,
 			log:         log,
 		}
+
+		eventManager.EventHandler("vulpescloud.events.v1.ServiceStateChangedEvent",
+			func(event *eventsv1.Event, log logr.Logger) {
+				data := event.GetData()
+				if data == nil {
+					log.Error(nil, "Event has no data")
+					return
+				}
+
+				changed := new(eventsv1.ServiceStateChangedEvent)
+				if err := data.UnmarshalTo(changed); err != nil {
+					log.Error(err, "Unable to decode service state event")
+					return
+				}
+
+				log.Info("Service state changed",
+					"service", changed.GetService().GetUuid(),
+					"oldState", changed.GetOldState(),
+					"newState", changed.GetNewState(),
+				)
+			},
+		)
 
 		return nil
 	},
@@ -49,9 +71,9 @@ type EventManager struct {
 	log         logr.Logger
 }
 
-func (m EventManager) EventHandler(method func(*eventsv1.Event, logr.Logger)) (grpc.ServerStreamingClient[eventsv1.Event], error) {
+func (m EventManager) EventHandler(eventId string, method func(*eventsv1.Event, logr.Logger)) (grpc.ServerStreamingClient[eventsv1.Event], error) {
 	stream, err := m.eventClient.Subscribe(m.ctx, &eventsv1.SubscribeRequest{
-		EventId: "vulpescloud.events.v1.ServiceStateChangedEvent",
+		EventId: eventId,
 	})
 
 	if err != nil {

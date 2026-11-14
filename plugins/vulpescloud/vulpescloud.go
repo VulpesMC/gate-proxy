@@ -5,12 +5,15 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"os"
+	"strconv"
 	"time"
 
 	eventspb "buf.build/gen/go/vulpescloud/protospecs/grpc/go/vulpescloud/events/v1/eventsv1grpc"
 	servicesv1grpc "buf.build/gen/go/vulpescloud/protospecs/grpc/go/vulpescloud/services/v1/servicesv1grpc"
 	eventsv1 "buf.build/gen/go/vulpescloud/protospecs/protocolbuffers/go/vulpescloud/events/v1"
+	nodev1 "buf.build/gen/go/vulpescloud/protospecs/protocolbuffers/go/vulpescloud/node/v1"
 	servicesv1 "buf.build/gen/go/vulpescloud/protospecs/protocolbuffers/go/vulpescloud/services/v1"
 	"github.com/go-logr/logr"
 	"github.com/robinbraemer/event"
@@ -64,6 +67,31 @@ var Plugin = proxy.Plugin{
 					"oldState", changed.GetOldState(),
 					"newState", changed.GetNewState(),
 				)
+				service := changed.GetService()
+				if service == nil || service.GetTask() == nil {
+					log.Error(errors.New("event is missing service or task"), "Unable to register service")
+					return
+				}
+
+				task := service.GetTask()
+				if changed.GetNewState() != servicesv1.ServiceState_SERVICE_STATE_RUNNING ||
+					task.GetServerSoftware().GetType() != nodev1.SoftwareType_SOFTWARE_TYPE_SERVER {
+					return
+				}
+
+				address, err := net.ResolveTCPAddr("tcp", net.JoinHostPort(
+					service.GetHostname(),
+					strconv.Itoa(int(service.GetPort())),
+				))
+				if err != nil {
+					log.Error(err, "Unable to resolve service address", "service", service.GetUuid())
+					return
+				}
+
+				serverName := fmt.Sprintf("%s-%d", task.GetName(), service.GetOrderedId())
+				if _, err := p.Register(proxy.NewServerInfo(serverName, address)); err != nil {
+					log.Error(err, "Unable to register service", "service", service.GetUuid(), "serverName", serverName)
+				}
 			},
 		)
 

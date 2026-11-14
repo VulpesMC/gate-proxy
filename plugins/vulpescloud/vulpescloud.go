@@ -39,7 +39,7 @@ var Plugin = proxy.Plugin{
 			log:         log,
 		}
 
-		eventManager.EventHandler("vulpescloud.events.v1.ServiceStateChangedEvent",
+		_, err = eventManager.EventHandler("vulpescloud.events.v1.ServiceStateChangedEvent",
 			func(event *eventsv1.Event, log logr.Logger) {
 				data := event.GetData()
 				if data == nil {
@@ -60,6 +60,10 @@ var Plugin = proxy.Plugin{
 				)
 			},
 		)
+
+		if err != nil {
+			log.Error(err, "Failed to Listen to ServiceStateChangeEvent!")
+		}
 
 		return nil
 	},

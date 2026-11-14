@@ -5,15 +5,21 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
+	"time"
 
 	eventspb "buf.build/gen/go/vulpescloud/protospecs/grpc/go/vulpescloud/events/v1/eventsv1grpc"
+	servicesv1grpc "buf.build/gen/go/vulpescloud/protospecs/grpc/go/vulpescloud/services/v1/servicesv1grpc"
 	eventsv1 "buf.build/gen/go/vulpescloud/protospecs/protocolbuffers/go/vulpescloud/events/v1"
+	servicesv1 "buf.build/gen/go/vulpescloud/protospecs/protocolbuffers/go/vulpescloud/services/v1"
 	"github.com/go-logr/logr"
+	"github.com/robinbraemer/event"
 	"github.com/vulpesmc/gate-proxy/plugins/vulpescloud/client"
 	"go.minekube.com/gate/pkg/edition/java/proxy"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
 var Plugin = proxy.Plugin{
@@ -64,6 +70,51 @@ var Plugin = proxy.Plugin{
 		if err != nil {
 			log.Error(err, "Failed to Listen to ServiceStateChangeEvent!")
 		}
+
+		mgr := p.Event()
+		event.Subscribe(mgr, 0, func(e *proxy.ReadyEvent) {
+			serviceUUID := os.Getenv("serviceUUID")
+
+			serviceClient := servicesv1grpc.NewServiceAPIServiceClient(client)
+			lookupCtx, cancelLookup := context.WithTimeout(ctx, 5*time.Second)
+			response, err := serviceClient.GetByUuid(lookupCtx, &servicesv1.GetByUuidRequest{
+				Uuid: serviceUUID,
+			})
+			cancelLookup()
+			if err != nil {
+				log.Error(err, "Unable to get local service")
+				return
+			}
+			localService := response.GetService()
+			if localService == nil {
+				log.Error(errors.New("service not found"), "Unable to get local service", "uuid", serviceUUID)
+				return
+			}
+
+			data, err := anypb.New(&eventsv1.ServiceStateChangedEvent{
+				Service:  localService,
+				OldState: localService.GetState(),
+				NewState: servicesv1.ServiceState_SERVICE_STATE_RUNNING,
+			})
+			if err != nil {
+				log.Error(err, "Unable to encode service state event")
+				return
+			}
+
+			publishCtx, cancelPublish := context.WithTimeout(ctx, 5*time.Second)
+			defer cancelPublish()
+			_, err = eventClient.Publish(publishCtx, &eventsv1.PublishRequest{
+				ForwardToOtherNodes: true,
+				Event: &eventsv1.Event{
+					Id:        "vulpescloud.events.v1.ServiceStateChangedEvent",
+					Timestamp: time.Now().UnixMilli(),
+					Data:      data,
+				},
+			})
+			if err != nil {
+				log.Error(err, "Unable to publish service state event")
+			}
+		})
 
 		return nil
 	},

@@ -52,6 +52,9 @@ func Connect() (*grpc.ClientConn, error) {
 	}
 
 	creds, err := BuildClientTLS(nodeCert, nodeKey, caCert)
+	if err != nil {
+		return nil, err
+	}
 	var opts []grpc.DialOption
 	opts = append(opts,
 		grpc.WithTransportCredentials(creds),

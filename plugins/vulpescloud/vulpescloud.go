@@ -49,13 +49,13 @@ type EventManager struct {
 	log         logr.Logger
 }
 
-func (m EventManager) EventHandler(method func(*eventsv1.Event, logr.Logger) error) (error, grpc.ServerStreamingClient[eventsv1.Event]) {
+func (m EventManager) EventHandler(method func(*eventsv1.Event, logr.Logger)) (grpc.ServerStreamingClient[eventsv1.Event], error) {
 	stream, err := m.eventClient.Subscribe(m.ctx, &eventsv1.SubscribeRequest{
 		EventId: "vulpescloud.events.v1.ServiceStateChangedEvent",
 	})
 
 	if err != nil {
-		return fmt.Errorf("unable to subscribe: %w", err), nil
+		return nil, fmt.Errorf("unable to subscribe: %w", err)
 	}
 
 	go func() {
@@ -77,5 +77,5 @@ func (m EventManager) EventHandler(method func(*eventsv1.Event, logr.Logger) err
 		}
 	}()
 
-	return nil, stream
+	return stream, nil
 }

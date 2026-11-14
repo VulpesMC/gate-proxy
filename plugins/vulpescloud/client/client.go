@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/minekube/gate-plugin-template/plugins/vulpescloud/auth"
+	"github.com/vulpesmc/gate-proxy/plugins/vulpescloud/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -53,7 +53,11 @@ func Connect() (*grpc.ClientConn, error) {
 
 	creds, err := BuildClientTLS(nodeCert, nodeKey, caCert)
 	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithTransportCredentials(creds), grpc.WithUnaryInterceptor(auth.AuthInterceptor(os.Getenv("secret"))))
+	opts = append(opts,
+		grpc.WithTransportCredentials(creds),
+		grpc.WithUnaryInterceptor(auth.AuthInterceptor(os.Getenv("secret"))),
+		grpc.WithStreamInterceptor(auth.AuthStreamInterceptor(os.Getenv("secret"))),
+	)
 
 	client, err := grpc.NewClient(
 		fmt.Sprintf("%s:%s", os.Getenv("grpc_hostname"), os.Getenv("grpc_port")),

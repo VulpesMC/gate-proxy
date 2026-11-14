@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/minekube/gate-plugin-template/plugins/vulpescloud"
+	"github.com/vulpesmc/gate-proxy/plugins/vulpescloud"
 	"go.minekube.com/gate/cmd/gate"
 	"go.minekube.com/gate/pkg/edition/java/proxy"
 )

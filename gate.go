@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/vulpesmc/gate-proxy/plugins/vulpescloud"
+	"github.com/vulpesmc/gate-proxy/plugins/vulpescloudproxy"
 	"go.minekube.com/gate/cmd/gate"
 	"go.minekube.com/gate/pkg/edition/java/proxy"
 )
@@ -16,6 +17,7 @@ func main() {
 		//
 		// Checkout https://github.com/minekube/awesome for some inspiration.
 		vulpescloud.Plugin,
+		vulpescloudproxy.Plugin,
 
 		// Add more plugins as you like.
 		// They will be initialized in the same order as appended.

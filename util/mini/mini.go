@@ -1,105 +1,26 @@
-// Package mini provides utilities for parsing and manipulating Minecraft text colors and styles.
-// It includes functions for parsing strings with embedded style information, modifying styles,
-// and creating gradient effects. It also provides functions for parsing color names and hex codes,
-// and for linear interpolation of colors.
-//
-// Credits to the partial Go port of MiniMessage (https://docs.advntr.dev/minimessage/index.html) by
-// https://github.com/emortalmc/GateProxy/blob/main/minimessage/minimessage.go.
+// Package mini provides compatibility helpers for MiniMessage and Minecraft text colors.
 package mini
 
 import (
 	"fmt"
-	"go.minekube.com/common/minecraft/color"
-	c "go.minekube.com/common/minecraft/component"
 	"math"
 	"strings"
+
+	"github.com/vulpesmc/gate-proxy/util/minimessage"
+	"go.minekube.com/common/minecraft/color"
+	c "go.minekube.com/common/minecraft/component"
 )
 
-// Parse takes a string as input and returns a `c.Text` object. It splits the input string by "<",
-// then further splits each substring by ">". It modifies the style based on the key (the part before ">")
-// and appends a new text component with the modified style and content (the part after ">").
-func Parse(mini string) *c.Text {
-	var styles []c.Style
-	styles = append(styles, c.Style{Color: color.White})
-
-	var components []c.Component
-
-	for _, s := range strings.Split(mini, "<") {
-		if s == "" {
-			continue
-		}
-
-		split := strings.Split(s, ">")
-
-		key := split[0]
-		if strings.HasPrefix(key, "/") {
-			styles = styles[:len(styles)-1]
-		} else {
-			newStyle := styles[len(styles)-1]
-
-			styles = append(styles, newStyle)
-		}
-
-		newText := modify(key, split[1], &styles[len(styles)-1])
-		components = append(components, newText)
-
-	}
-
-	return &c.Text{
-		Extra: components,
-	}
+func Deserialize(input string) (*c.Text, error) {
+	return minimessage.Deserialize(input)
 }
 
-// modify takes a key, content, and style as input and returns a `c.Text` object. It modifies the style
-// based on the key and returns a new text component with the modified style and content.
-func modify(key string, content string, style *c.Style) *c.Text {
-	newText := &c.Text{}
-
-	switch {
-	case strings.HasPrefix(key, "#"): // <#ff00ff>
-		parsed, err := ParseColor(key)
-		if err != nil {
-			fmt.Println(err)
-			return nil
-		}
-		style.Color = parsed
-		newText.Content = content
-		newText.S = *style
-	case strings.HasPrefix(key, "color"): // <color:light_purple>
-		colorName := strings.Split(key, ":")[1]
-		parsed, err := ParseColor(colorName)
-		if err != nil {
-			fmt.Println(err)
-			return nil
-		}
-		style.Color = parsed
-		newText.Content = content
-		newText.S = *style
-
-	case key == "bold": // <bold>
-		style.Bold = c.True
-		newText.Content = content
-		newText.S = *style
-
-	case strings.HasPrefix(key, "gradient"): // <gradient:light_purple:gold>
-		colorKey := strings.Split(key, ":")
-		colorNames := colorKey[1:]
-
-		colors := make([]color.RGB, len(colorNames))
-		for i, col := range colorNames {
-			parsedColor, err := ParseColor(col)
-			if err != nil {
-				fmt.Println(err)
-				return nil
-			}
-			newColor, _ := color.Make(parsedColor)
-			colors[i] = *newColor
-		}
-
-		newText = Gradient(content, *style, colors...)
+func Parse(input string) *c.Text {
+	parsed, err := Deserialize(input)
+	if err != nil {
+		panic(err)
 	}
-
-	return newText
+	return parsed
 }
 
 // ParseColor takes a string as input and returns a `color.Color` object. It checks if the input string

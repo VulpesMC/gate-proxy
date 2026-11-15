@@ -5,8 +5,11 @@ go 1.26.9
 require (
 	buf.build/gen/go/vulpescloud/protospecs/grpc/go v1.6.2-20261114141902-5160f0c0bb60.1
 	buf.build/gen/go/vulpescloud/protospecs/protocolbuffers/go v1.36.12-20261114141902-5160f0c0bb60.2
+	github.com/Hoppou-Hangout/micromessage v0.6.0
 	github.com/go-logr/logr v1.4.4
+	github.com/google/uuid v1.6.0
 	github.com/robinbraemer/event v0.1.1
+	go.minekube.com/brigodier v0.0.2
 	go.minekube.com/common v0.4.0
 	go.minekube.com/gate v0.81.1
 	google.golang.org/grpc v1.85.0
@@ -39,7 +42,6 @@ require (
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.33.0 // indirect
 	github.com/honeycombio/otel-config-go v1.17.0 // indirect
 	github.com/jellydator/ttlcache/v3 v3.4.1 // indirect
@@ -72,7 +74,6 @@ require (
 	github.com/xrash/smetrics v0.0.0-20261013231157-39c47d93efba // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	github.com/zyedidia/generic v1.2.1 // indirect
-	go.minekube.com/brigodier v0.0.2 // indirect
 	go.minekube.com/connect v0.6.3-0.20260803141147-8001cda93b1d // indirect
 	go.minekube.com/geyserlite v0.7.6 // indirect
 	go.minekube.com/vialite v0.3.12 // indirect

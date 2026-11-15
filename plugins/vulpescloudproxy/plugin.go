@@ -12,7 +12,9 @@ import (
 	"github.com/robinbraemer/event"
 	"github.com/vulpesmc/gate-proxy/plugins/vulpescloud"
 	"github.com/vulpesmc/gate-proxy/plugins/vulpescloud/client"
+	"github.com/vulpesmc/gate-proxy/util/minimessage"
 	"go.minekube.com/brigodier"
+	"go.minekube.com/common/minecraft/component"
 	"go.minekube.com/gate/pkg/command"
 	"go.minekube.com/gate/pkg/edition/java/proxy"
 )
@@ -52,10 +54,14 @@ var Plugin = proxy.Plugin{
 		serviceName := fmt.Sprintf("%s-%d", service.GetTask().GetName(), service.GetOrderedId())
 
 		event.Subscribe(p.Event(), 0, func(e *proxy.PingEvent) {
-			handlePing(e, configState.get(), serviceName)
+			if err := handlePing(e, configState.get(), serviceName); err != nil {
+				log.Error(err, "Unable to apply proxy MOTD")
+			}
 		})
 		event.Subscribe(p.Event(), 0, func(e *proxy.PostLoginEvent) {
-			handlePostLogin(p, e, configState, service.GetTask().GetMaxPlayers())
+			if err := handlePostLogin(p, e, configState, service.GetTask().GetMaxPlayers()); err != nil {
+				log.Error(err, "Unable to apply proxy login policy", "player", e.Player().Username())
+			}
 		})
 		event.Subscribe(p.Event(), 0, func(e *proxy.ShutdownEvent) {
 			log.Info("Stopping")
@@ -68,7 +74,7 @@ var Plugin = proxy.Plugin{
 	},
 }
 
-func handlePing(event *proxy.PingEvent, config ProxyModuleConfig, serviceName string) {
+func handlePing(event *proxy.PingEvent, config ProxyModuleConfig, serviceName string) error {
 	maintenance := config.Maintenance
 	motd := config.MOTD
 	var firstLine, secondLine string
@@ -78,7 +84,7 @@ func handlePing(event *proxy.PingEvent, config ProxyModuleConfig, serviceName st
 	case motd.Enabled:
 		firstLine, secondLine = motd.FirstLine, motd.SecondLine
 	default:
-		return
+		return nil
 	}
 
 	pingResponse := event.Ping()
@@ -92,8 +98,13 @@ func handlePing(event *proxy.PingEvent, config ProxyModuleConfig, serviceName st
 		"%playerCount%", fmt.Sprint(online),
 		"%playerMax%", fmt.Sprint(max),
 	)
-	pingResponse.Description = parseMiniMessage(replace.Replace(firstLine) + "\n" + replace.Replace(secondLine))
+	description, err := minimessage.Deserialize(replace.Replace(firstLine) + "\n" + replace.Replace(secondLine))
+	if err != nil {
+		return fmt.Errorf("parse proxy MOTD: %w", err)
+	}
+	pingResponse.Description = description
 	event.SetPing(pingResponse)
+	return nil
 }
 
 func handlePostLogin(
@@ -101,18 +112,29 @@ func handlePostLogin(
 	event *proxy.PostLoginEvent,
 	configState *proxyModuleConfigState,
 	maxPlayers uint32,
-) {
+) error {
 	config := configState.get()
 	player := event.Player()
 	if config.Maintenance.Active {
 		if !player.HasPermission(config.Maintenance.BypassPermission) {
-			player.Disconnect(parseMiniMessage(config.Maintenance.KickMessage))
+			message, err := minimessage.Deserialize(config.Maintenance.KickMessage)
+			if err != nil {
+				player.Disconnect(&component.Text{Content: config.Maintenance.KickMessage})
+				return fmt.Errorf("parse maintenance kick message: %w", err)
+			}
+			player.Disconnect(message)
 		}
-		return
+		return nil
 	}
 	if maxPlayers > 0 && p.PlayerCount() >= int(maxPlayers) {
-		player.Disconnect(parseMiniMessage(config.FullKickMessage))
+		message, err := minimessage.Deserialize(config.FullKickMessage)
+		if err != nil {
+			player.Disconnect(&component.Text{Content: config.FullKickMessage})
+			return fmt.Errorf("parse full-server kick message: %w", err)
+		}
+		player.Disconnect(message)
 	}
+	return nil
 }
 
 func vulpesCloudProxyCommand(
@@ -129,9 +151,13 @@ func vulpesCloudProxyCommand(
 				return c.Source != nil && c.Source.HasPermission(PermissionReload)
 			})).
 			Executes(command.Command(func(c *command.Context) error {
-				if err := c.SendMessage(parseMiniMessage(
+				pulling, err := minimessage.Deserialize(
 					"<grey>[<aqua>VulpesCloud-Proxy-Module</aqua>]</grey> Pulling new configuration!",
-				)); err != nil {
+				)
+				if err != nil {
+					return fmt.Errorf("parse reload feedback: %w", err)
+				}
+				if err := c.SendMessage(pulling); err != nil {
 					return err
 				}
 
@@ -141,8 +167,12 @@ func vulpesCloudProxyCommand(
 					log.Error(err, "Unable to reload proxy module config")
 					return err
 				}
-				return c.SendMessage(parseMiniMessage(
+				success, err := minimessage.Deserialize(
 					"<grey>[<aqua>VulpesCloud-Proxy-Module</aqua>]</grey> <gray>Successfully pulled new configuration!</gray>",
-				))
+				)
+				if err != nil {
+					return fmt.Errorf("parse reload feedback: %w", err)
+				}
+				return c.SendMessage(success)
 			})))
 }

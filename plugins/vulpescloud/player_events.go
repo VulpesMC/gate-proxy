@@ -16,6 +16,7 @@ import (
 	servicesv1 "buf.build/gen/go/vulpescloud/protospecs/protocolbuffers/go/vulpescloud/services/v1"
 	"github.com/go-logr/logr"
 	"github.com/robinbraemer/event"
+	"github.com/vulpesmc/gate-proxy/util/minimessage"
 	"go.minekube.com/common/minecraft/component"
 	"go.minekube.com/gate/pkg/edition/java/proxy"
 	"go.minekube.com/gate/pkg/edition/java/title"
@@ -232,9 +233,12 @@ func (h *PlayerEventHandler) handleKickedFromServer(e *proxy.KickedFromServerEve
 			})
 			return
 		}
-		e.SetResult(&proxy.DisconnectPlayerKickResult{
-			Reason: deserializeMiniMessage(config.DisconnectNoAvailableServerMessage),
-		})
+		reason, err := minimessage.Deserialize(config.DisconnectNoAvailableServerMessage)
+		if err != nil {
+			h.log.Error(err, "Unable to parse no-fallback disconnect message")
+			reason = &component.Text{Content: config.DisconnectNoAvailableServerMessage}
+		}
+		e.SetResult(&proxy.DisconnectPlayerKickResult{Reason: reason})
 		return
 	}
 
@@ -297,7 +301,12 @@ func (h *PlayerEventHandler) handlePlayerAction(e *eventsv1.Event, log logr.Logg
 	}
 	values := action.GetData()
 	message := func(key string) component.Component {
-		return deserializeMiniMessage(values[key])
+		parsed, err := minimessage.Deserialize(values[key])
+		if err != nil {
+			log.Error(err, "Unable to parse player action MiniMessage", "action", action.GetAction(), "field", key)
+			return &component.Text{Content: values[key]}
+		}
+		return parsed
 	}
 
 	switch action.GetAction() {

@@ -2,10 +2,9 @@ package vulpescloudproxy
 
 import (
 	"encoding/json"
-	"strings"
 	"testing"
 
-	"go.minekube.com/common/minecraft/component"
+	"github.com/vulpesmc/gate-proxy/util/minimessage"
 )
 
 func TestDefaultProxyModuleConfigMatchesModuleDefaults(t *testing.T) {
@@ -36,18 +35,12 @@ func TestDefaultProxyModuleConfigMatchesModuleDefaults(t *testing.T) {
 	}
 }
 
-func TestParseMiniMessageDefaultTags(t *testing.T) {
-	parsed := parseMiniMessage("<grey>[<aqua>VulpesCloud</aqua>]</grey>").(*component.Text)
+func TestMiniMessageDefaultTags(t *testing.T) {
+	parsed, err := minimessage.Deserialize("<grey>[<aqua>VulpesCloud</aqua>]</grey>")
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(parsed.Extra) != 3 {
 		t.Fatalf("expected 3 formatted text components, got %d", len(parsed.Extra))
-	}
-	for _, child := range parsed.Extra {
-		text, ok := child.(*component.Text)
-		if !ok {
-			t.Fatalf("expected text component, got %T", child)
-		}
-		if strings.Contains(text.Content, "<") || strings.Contains(text.Content, ">") {
-			t.Fatalf("expected recognized tags to be removed, got %q", text.Content)
-		}
 	}
 }

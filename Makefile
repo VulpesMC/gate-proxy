@@ -18,4 +18,4 @@ vet:
 
 # Run golangci-lint against code
 lint:
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint@latest run
+	go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest run

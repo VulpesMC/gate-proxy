@@ -14,7 +14,7 @@ require (
 )
 
 require (
-	buf.build/gen/go/minekube/connect/protocolbuffers/go v1.36.12-20260804143140-627ed2ccde0f.2 // indirect
+	buf.build/gen/go/minekube/connect/protocolbuffers/go v1.36.10-20240220124425-904ce30425c9.1 // indirect
 	connectrpc.com/connect v1.21.1 // indirect
 	connectrpc.com/connect/v2 v2.0.2 // indirect
 	connectrpc.com/otelconnect v0.12.0 // indirect

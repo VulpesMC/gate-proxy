@@ -2,6 +2,8 @@ buf.build/gen/go/minekube/connect/protocolbuffers/go v1.36.10-20240220124425-904
 buf.build/gen/go/minekube/connect/protocolbuffers/go v1.36.10-20240220124425-904ce30425c9.1/go.mod h1:xplT/bRgOr5C8V+POP26mv9agbvNmy0M2amPLZZe87s=
 buf.build/gen/go/vulpescloud/protospecs/grpc/go v1.6.2-20261114141902-5160f0c0bb60.1 h1:TGSQNaoMdbrcNMYVPPe/pNB7TgmGgNk3CoQaBCfduBI=
 buf.build/gen/go/vulpescloud/protospecs/grpc/go v1.6.2-20261114141902-5160f0c0bb60.1/go.mod h1:c6oasnI4anOia2hjIP7EJ7R2DR96+erH3HNkwSEUrlc=
+buf.build/gen/go/vulpescloud/protospecs/grpc/go v1.6.2-20261118172518-f9a7f518817e.1 h1:HL02CsunFW6rE0JVdR/97YkVrIb1ADjP0u5Pf2fSZVs=
+buf.build/gen/go/vulpescloud/protospecs/grpc/go v1.6.2-20261118172518-f9a7f518817e.1/go.mod h1:XHIPSLv34wXpVRePnMdDhoGNNK/7jXfYbYJ678fs9gI=
 buf.build/gen/go/vulpescloud/protospecs/protocolbuffers/go v1.36.12-20261114141902-5160f0c0bb60.2 h1:UQWcTnMcsRuxGtgN7v2Yrl1YC3o0H4R86aY+F4NCd2g=
 buf.build/gen/go/vulpescloud/protospecs/protocolbuffers/go v1.36.12-20261114141902-5160f0c0bb60.2/go.mod h1:8ArpyY4w5IPEF7+chin54bdkg1bH/9fxWil+IEUOn/U=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=

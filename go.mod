@@ -3,7 +3,7 @@ module github.com/vulpesmc/gate-proxy
 go 1.26.9
 
 require (
-	buf.build/gen/go/vulpescloud/protospecs/grpc/go v1.6.2-20261114141902-5160f0c0bb60.1
+	buf.build/gen/go/vulpescloud/protospecs/grpc/go v1.6.2-20261118172518-f9a7f518817e.1
 	buf.build/gen/go/vulpescloud/protospecs/protocolbuffers/go v1.36.12-20261114141902-5160f0c0bb60.2
 	github.com/Hoppou-Hangout/micromessage v0.6.0
 	github.com/go-logr/logr v1.4.4

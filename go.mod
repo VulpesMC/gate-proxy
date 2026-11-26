@@ -11,7 +11,7 @@ require (
 	github.com/robinbraemer/event v0.1.1
 	go.minekube.com/brigodier v0.0.2
 	go.minekube.com/common v0.4.0
-	go.minekube.com/gate v0.81.1
+	go.minekube.com/gate v0.82.3
 	google.golang.org/grpc v1.85.0
 	google.golang.org/protobuf v1.36.12
 )
